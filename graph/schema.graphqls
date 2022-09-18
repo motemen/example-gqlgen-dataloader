@@ -2,11 +2,16 @@
 #
 # https://gqlgen.com/getting-started/
 
+directive @goField(
+  forceResolver: Boolean
+  name: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Todo {
   id: ID!
   text: String!
   done: Boolean!
-  user: User!
+  user: User! @goField(forceResolver: true)
 }
 
 type User {
@@ -23,6 +28,12 @@ input NewTodo {
   userId: String!
 }
 
+input NewUser {
+  id: ID
+  name: String!
+}
+
 type Mutation {
   createTodo(input: NewTodo!): Todo!
+  createUser(input: NewUser!): User!
 }
