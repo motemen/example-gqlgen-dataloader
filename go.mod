@@ -9,6 +9,8 @@ require (
 	gorm.io/gorm v1.23.9
 )
 
+require github.com/graph-gophers/dataloader/v7 v7.0.0
+
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/google/uuid v1.3.0

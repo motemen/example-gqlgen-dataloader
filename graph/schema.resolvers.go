@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/motemen/example-gqlgen-dataloader/db"
+	"github.com/motemen/example-gqlgen-dataloader/db/loaders"
 	"github.com/motemen/example-gqlgen-dataloader/graph/generated"
 	"github.com/motemen/example-gqlgen-dataloader/graph/model"
 )
@@ -56,13 +57,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*db.Todo, error) {
 
 // User is the resolver for the user field.
 func (r *todoResolver) User(ctx context.Context, obj *db.Todo) (*db.User, error) {
-	var user db.User
-	user.ID = obj.UserID
-	err := r.DB.First(&user).Error
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
+	return loaders.GetUser(ctx, obj.UserID)
 }
 
 // Mutation returns generated.MutationResolver implementation.
