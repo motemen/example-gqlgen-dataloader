@@ -9,12 +9,13 @@ require (
 	gorm.io/gorm v1.23.9
 )
 
-require github.com/graph-gophers/dataloader/v7 v7.0.0
+require github.com/opentracing/opentracing-go v1.2.0 // indirect
 
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/graph-gophers/dataloader v5.0.0+incompatible
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect

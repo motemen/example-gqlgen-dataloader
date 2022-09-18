@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/graph-gophers/dataloader/v7"
+	"github.com/graph-gophers/dataloader"
 	"github.com/motemen/example-gqlgen-dataloader/db"
 )
 
 var contextKey = &struct{ name string }{"loaders"}
 
 type loaders struct {
-	userLoader *dataloader.Loader[string, *db.User]
+	userLoader *dataloader.Loader
 }
 
 func Middleware(dbConn *db.DB, next http.Handler) http.Handler {
@@ -28,17 +28,21 @@ func Middleware(dbConn *db.DB, next http.Handler) http.Handler {
 
 func GetUser(ctx context.Context, userID string) (*db.User, error) {
 	loaders := ctx.Value(contextKey).(*loaders)
-	thunk := loaders.userLoader.Load(ctx, userID)
-	return thunk()
+	thunk := loaders.userLoader.Load(ctx, dataloader.StringKey(userID))
+	result, err := thunk()
+	if err != nil {
+		return nil, err
+	}
+	return result.(*db.User), nil
 }
 
 type batchReader struct {
 	db *db.DB
 }
 
-var _ dataloader.BatchFunc[string, *db.User] = ((*batchReader)(nil)).GetUsers
+var _ dataloader.BatchFunc = ((*batchReader)(nil)).GetUsers
 
-func (br *batchReader) GetUsers(ctx context.Context, keys []string) []*dataloader.Result[*db.User] {
+func (br *batchReader) GetUsers(ctx context.Context, keys dataloader.Keys) []*dataloader.Result {
 	var users []db.User
 	err := br.db.Find(&users, keys).Error
 	if err != nil {
@@ -50,12 +54,12 @@ func (br *batchReader) GetUsers(ctx context.Context, keys []string) []*dataloade
 		userById[user.ID] = user
 	}
 
-	result := make([]*dataloader.Result[*db.User], len(keys))
+	result := make([]*dataloader.Result, len(keys))
 	for i, key := range keys {
-		if user, ok := userById[key]; ok {
-			result[i] = &dataloader.Result[*db.User]{Data: &user}
+		if user, ok := userById[key.String()]; ok {
+			result[i] = &dataloader.Result{Data: &user}
 		} else {
-			result[i] = &dataloader.Result[*db.User]{Error: fmt.Errorf("user not found: %s", key)}
+			result[i] = &dataloader.Result{Error: fmt.Errorf("user not found: %s", key)}
 		}
 	}
 
